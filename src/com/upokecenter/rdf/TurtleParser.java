@@ -518,8 +518,7 @@ public class TurtleParser implements IRDFParser {
 					if(ch>=0)input.moveBack(1);
 					break;
 				}
-				if(!skipWhitespace())
-					throw new ParserException();
+				skipWhitespace();
 			}
 			// Read object
 			TurtleObject obj=readObject(true);
