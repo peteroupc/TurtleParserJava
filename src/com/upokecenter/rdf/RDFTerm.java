@@ -42,100 +42,100 @@ public final class RDFTerm {
 		return true;
 	}
 
-	private static void escapeLanguageTag(String str, StringBuilder sb){
+	private static void escapeLanguageTag(String str, StringBuilder builder){
 		int length=str.length();
 		boolean hyphen=false;
 		for(int i=0;i<length;i++){
 			int c=str.charAt(i);
 			if((c>='A' && c<='Z')){
-				sb.append((char)(c+0x20));
+				builder.append((char)(c+0x20));
 			} else if(c>='a' && c<='z'){
-				sb.append((char)c);
+				builder.append((char)c);
 			} else if(hyphen && c>='0' && c<='9'){
-				sb.append((char)c);
+				builder.append((char)c);
 			} else if(c=='-'){
-				sb.append((char)c);
+				builder.append((char)c);
 				hyphen=true;
 				if(i+1<length && str.charAt(i+1)=='-')
-					sb.append('x');
+					builder.append('x');
 			} else {
-				sb.append('x');
+				builder.append('x');
 			}
 		}
 	}
 	
-	private static void escapeBlankNode(String str, StringBuilder sb){
+	private static void escapeBlankNode(String str, StringBuilder builder){
 		int length=str.length();
 		String hex="0123456789ABCDEF";
 		for(int i=0;i<length;i++){
 			int c=str.charAt(i);
 			if((c>='A' && c<='Z') || (c>='a' && c<='z') || 
 					(c>0 && c>='0' && c<='9')){
-				sb.append((char)c);
+				builder.append((char)c);
 			}
 			else if(c>=0xD800 && c<=0xDBFF && i+1<length &&
 					str.charAt(i+1)>=0xDC00 && str.charAt(i+1)<=0xDFFF){
 				// Get the Unicode code point for the surrogate pair
 				c=0x10000+(c-0xD800)*0x400+(str.charAt(i+1)-0xDC00);
-				sb.append("U00");
-				sb.append(hex.charAt((c>>20)&15));
-				sb.append(hex.charAt((c>>16)&15));
-				sb.append(hex.charAt((c>>12)&15));
-				sb.append(hex.charAt((c>>8)&15));
-				sb.append(hex.charAt((c>>4)&15));
-				sb.append(hex.charAt((c)&15));
+				builder.append("U00");
+				builder.append(hex.charAt((c>>20)&15));
+				builder.append(hex.charAt((c>>16)&15));
+				builder.append(hex.charAt((c>>12)&15));
+				builder.append(hex.charAt((c>>8)&15));
+				builder.append(hex.charAt((c>>4)&15));
+				builder.append(hex.charAt((c)&15));
 				i++;
 			}
 			else {
-				sb.append("u");
-				sb.append(hex.charAt((c>>12)&15));
-				sb.append(hex.charAt((c>>8)&15));
-				sb.append(hex.charAt((c>>4)&15));
-				sb.append(hex.charAt((c)&15));				
+				builder.append("u");
+				builder.append(hex.charAt((c>>12)&15));
+				builder.append(hex.charAt((c>>8)&15));
+				builder.append(hex.charAt((c>>4)&15));
+				builder.append(hex.charAt((c)&15));				
 			}
 		}
 	}
 
 	private static void escapeString(String str, 
-			StringBuilder sb, boolean uri){
+			StringBuilder builder, boolean uri){
 		int length=str.length();
 		String hex="0123456789ABCDEF";
 		for(int i=0;i<length;i++){
 			int c=str.charAt(i);
 			if(c==0x09){
-				sb.append("\\t");
+				builder.append("\\t");
 			} else if(c==0x0a){
-				sb.append("\\n");				
+				builder.append("\\n");				
 			} else if(c==0x0d){
-				sb.append("\\r");				
+				builder.append("\\r");				
 			} else if(c==0x22){
-				sb.append("\\\"");				
+				builder.append("\\\"");				
 			} else if(c==0x5c){
-				sb.append("\\\\");
+				builder.append("\\\\");
 			} else if(uri && c=='>'){
-				sb.append("%3E");
+				builder.append("%3E");
 			} else if(c>=0x20 && c<=0x7E){
-				sb.append((char)c);
+				builder.append((char)c);
 			}
 			else if(c>=0xD800 && c<=0xDBFF && i+1<length &&
 					str.charAt(i+1)>=0xDC00 && str.charAt(i+1)<=0xDFFF){
 				// Get the Unicode code point for the surrogate pair
 				c=0x10000+(c-0xD800)*0x400+(str.charAt(i+1)-0xDC00);
-				sb.append("\\U00");
-				sb.append(hex.charAt((c>>20)&15));
-				sb.append(hex.charAt((c>>16)&15));
-				sb.append(hex.charAt((c>>12)&15));
-				sb.append(hex.charAt((c>>8)&15));
-				sb.append(hex.charAt((c>>4)&15));
-				sb.append(hex.charAt((c)&15));
+				builder.append("\\U00");
+				builder.append(hex.charAt((c>>20)&15));
+				builder.append(hex.charAt((c>>16)&15));
+				builder.append(hex.charAt((c>>12)&15));
+				builder.append(hex.charAt((c>>8)&15));
+				builder.append(hex.charAt((c>>4)&15));
+				builder.append(hex.charAt((c)&15));
 				i++;
 			}
 			else {
-				sb.append("\\u");
-				sb.append(hex.charAt((c>>12)&15));
-				sb.append(hex.charAt((c>>8)&15));
-				sb.append(hex.charAt((c>>4)&15));
-				sb.append(hex.charAt((c)&15));				
+				builder.append("\\u");
+				builder.append(hex.charAt((c>>12)&15));
+				builder.append(hex.charAt((c>>8)&15));
+				builder.append(hex.charAt((c>>4)&15));
+				builder.append(hex.charAt((c)&15));				
 			}
 		}
 	}
@@ -149,36 +149,36 @@ public final class RDFTerm {
 	 */
 	@Override
 	public String toString(){
-		StringBuilder sb=null;
+		StringBuilder builder=null;
 		if(this.kind==BLANK){
-			sb=new StringBuilder();
-			sb.append("_:");
-			escapeBlankNode(identifier,sb);
+			builder=new StringBuilder();
+			builder.append("_:");
+			escapeBlankNode(identifier,builder);
 		} else if(this.kind==LANGSTRING){
-			sb=new StringBuilder();
-			sb.append("\"");
-			escapeString(lexicalForm,sb,false);
-			sb.append("\"@");
-			escapeLanguageTag(languageTag,sb);
+			builder=new StringBuilder();
+			builder.append("\"");
+			escapeString(lexicalForm,builder,false);
+			builder.append("\"@");
+			escapeLanguageTag(languageTag,builder);
 		} else if(this.kind==TYPEDSTRING){
-			sb=new StringBuilder();
-			sb.append("\"");
-			escapeString(lexicalForm,sb,false);
-			sb.append("\"");
+			builder=new StringBuilder();
+			builder.append("\"");
+			escapeString(lexicalForm,builder,false);
+			builder.append("\"");
 			if(!"http://www.w3.org/2001/XMLSchema#string".equals(identifier)){
-				sb.append("^^<");
-				escapeString(identifier,sb,true);
-				sb.append(">");
+				builder.append("^^<");
+				escapeString(identifier,builder,true);
+				builder.append(">");
 			}
 		} else if(this.kind==IRI){
-			sb=new StringBuilder();
-			sb.append("<");
-			escapeString(identifier,sb,true);
-			sb.append(">");			
+			builder=new StringBuilder();
+			builder.append("<");
+			escapeString(identifier,builder,true);
+			builder.append(">");			
 		} else {
 			return "<about:blank>";
 		}
-		return sb.toString();
+		return builder.toString();
 	}
 	/**
 	 * A blank node.
@@ -204,7 +204,7 @@ public final class RDFTerm {
 	 * Gets the IRI or blank node label for this RDF
 	 * literal. Supported by all kinds.
 	 * 
-	 * @return
+	 * 
 	 */
 	public String getIdentifier() {
 		return identifier;
@@ -213,7 +213,7 @@ public final class RDFTerm {
 	 * Gets the language tag for this RDF literal.
 	 * Supported by the LANGSTRING kind.
 	 * 
-	 * @return
+	 * 
 	 */
 	public String getLanguageTag() {
 		return languageTag;
@@ -222,7 +222,7 @@ public final class RDFTerm {
 	 * Gets the lexical form of an RDF literal.
 	 * Supported in the LANGSTRING and TYPEDSTRING kinds.
 	 * 
-	 * @return
+	 * 
 	 */
 	public String getLexicalForm() {
 		return lexicalForm;

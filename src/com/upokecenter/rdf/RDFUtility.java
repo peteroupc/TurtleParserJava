@@ -11,7 +11,7 @@ public final class RDFUtility {
 	 * 
 	 * @param a
 	 * @param b
-	 * @return
+	 * 
 	 */
 	private static boolean laxEqual(RDFTriple a, RDFTriple b){
 		if(a==null)return (b==null);

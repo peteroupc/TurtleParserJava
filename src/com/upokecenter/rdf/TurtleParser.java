@@ -237,8 +237,7 @@ public class TurtleParser implements IRDFParser {
 		while(true){
 			int c2=input.read();
 			if(c2>='A' && c2<='Z'){
-				// append lowercase
-				ilist.appendInt(c2+0x20);
+				ilist.appendInt(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(c2>='a' && c2<='z'){
