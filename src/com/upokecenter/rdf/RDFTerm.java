@@ -56,20 +56,21 @@ public final class RDFTerm {
 			} else if(c=='-'){
 				builder.append((char)c);
 				hyphen=true;
-				if(i+1<length && str.charAt(i+1)=='-')
+				if(i+1<length && str.charAt(i+1)=='-') {
 					builder.append('x');
+				}
 			} else {
 				builder.append('x');
 			}
 		}
 	}
-	
+
 	private static void escapeBlankNode(String str, StringBuilder builder){
 		int length=str.length();
 		String hex="0123456789ABCDEF";
 		for(int i=0;i<length;i++){
 			int c=str.charAt(i);
-			if((c>='A' && c<='Z') || (c>='a' && c<='z') || 
+			if((c>='A' && c<='Z') || (c>='a' && c<='z') ||
 					(c>0 && c>='0' && c<='9')){
 				builder.append((char)c);
 			}
@@ -91,12 +92,12 @@ public final class RDFTerm {
 				builder.append(hex.charAt((c>>12)&15));
 				builder.append(hex.charAt((c>>8)&15));
 				builder.append(hex.charAt((c>>4)&15));
-				builder.append(hex.charAt((c)&15));				
+				builder.append(hex.charAt((c)&15));
 			}
 		}
 	}
 
-	private static void escapeString(String str, 
+	private static void escapeString(String str,
 			StringBuilder builder, boolean uri){
 		int length=str.length();
 		String hex="0123456789ABCDEF";
@@ -105,11 +106,11 @@ public final class RDFTerm {
 			if(c==0x09){
 				builder.append("\\t");
 			} else if(c==0x0a){
-				builder.append("\\n");				
+				builder.append("\\n");
 			} else if(c==0x0d){
-				builder.append("\\r");				
+				builder.append("\\r");
 			} else if(c==0x22){
-				builder.append("\\\"");				
+				builder.append("\\\"");
 			} else if(c==0x5c){
 				builder.append("\\\\");
 			} else if(uri && c=='>'){
@@ -135,11 +136,11 @@ public final class RDFTerm {
 				builder.append(hex.charAt((c>>12)&15));
 				builder.append(hex.charAt((c>>8)&15));
 				builder.append(hex.charAt((c>>4)&15));
-				builder.append(hex.charAt((c)&15));				
+				builder.append(hex.charAt((c)&15));
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * Gets a string representation of this RDF term
@@ -174,10 +175,9 @@ public final class RDFTerm {
 			builder=new StringBuilder();
 			builder.append("<");
 			escapeString(identifier,builder,true);
-			builder.append(">");			
-		} else {
+			builder.append(">");
+		} else
 			return "<about:blank>";
-		}
 		return builder.toString();
 	}
 	/**
@@ -239,11 +239,10 @@ public final class RDFTerm {
 		ret.kind=TYPEDSTRING;
 		ret.identifier=iri;
 		ret.lexicalForm=str;
-		if(iri.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString")){
+		if(iri.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"))
 			// this can't be a language string
 			// because there is no language tag
 			throw new IllegalArgumentException("iri");
-		}
 		return ret;
 	}
 	public static RDFTerm fromBlankNode(String name){

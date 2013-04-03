@@ -28,9 +28,8 @@ public class Utf8CharacterInput implements ICharacterInput {
 		if(unitCount==0)return 0;
 		for(int i=0;i<unitCount;i++){
 			int c=read();
-			if(c<0){
+			if(c<0)
 				return i==0 ? -1 : i;
-			}
 			buf[offset++]=c;
 		}
 		return unitCount;
@@ -48,13 +47,11 @@ public class Utf8CharacterInput implements ICharacterInput {
 			if(b<0 && bytesNeeded!=0){
 				bytesNeeded=0;
 				throw new MalformedInputException(1);
-			} else if(b<0){
+			} else if(b<0)
 				return -1;
-			}
 			if(bytesNeeded==0){
-				if(b<0x80){
+				if(b<0x80)
 					return b;
-				}
 				else if(b>=0xc2 && b<=0xdf){
 					stream.mark(4);
 					bytesNeeded=1;

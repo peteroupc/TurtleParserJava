@@ -27,14 +27,14 @@ import com.upokecenter.util.Utf8CharacterInput;
  */
 public class TurtleParser implements IRDFParser {
 
-	private Map<String,RDFTerm> bnodeLabels;
-	private Map<String,String> namespaces;
+	private final Map<String,RDFTerm> bnodeLabels;
+	private final Map<String,String> namespaces;
 	private String baseURI;
 	private TurtleObject curSubject;
 	private RDFTerm curPredicate;
 
-	private StackableCharacterInput input;
-	
+	private final StackableCharacterInput input;
+
 	public TurtleParser(InputStream stream, String baseURI){
 		if((stream)==null)throw new NullPointerException("stream");
 		if(baseURI==null)throw new NullPointerException("baseURI");
@@ -44,13 +44,13 @@ public class TurtleParser implements IRDFParser {
 				new Utf8CharacterInput(stream));
 		this.baseURI=baseURI;
 		bnodeLabels=new HashMap<String,RDFTerm>();
-		namespaces=new HashMap<String,String>();		
+		namespaces=new HashMap<String,String>();
 	}
 
 	public TurtleParser(InputStream stream){
 		this(stream,"about:blank");
 	}
-	
+
 
 	private static boolean isChar(int c, String asciiChars){
 		return (c>=0 && c<=0x7F && asciiChars.indexOf((char)c)>=0);
@@ -64,7 +64,7 @@ public class TurtleParser implements IRDFParser {
 				new StringCharacterInput(str,true));
 		this.baseURI=baseURI;
 		bnodeLabels=new HashMap<String,RDFTerm>();
-		namespaces=new HashMap<String,String>();		
+		namespaces=new HashMap<String,String>();
 	}
 
 	public TurtleParser(String str){
@@ -80,10 +80,14 @@ public class TurtleParser implements IRDFParser {
 				while(true){
 					ch=input.read();
 					if(ch<0)return true;
-					if(ch==0x0d || ch==0x0a)break;
+					if(ch==0x0d || ch==0x0a) {
+						break;
+					}
 				}
 			} else if(ch!=0x09 && ch!=0x0a && ch!=0x0d && ch!=0x20){
-				if(ch>=0)input.moveBack(1);
+				if(ch>=0) {
+					input.moveBack(1);
+				}
 				return haveWhitespace;
 			}
 			haveWhitespace=true;
@@ -99,7 +103,9 @@ public class TurtleParser implements IRDFParser {
 			if(ch==')'){
 				break;
 			} else {
-				if(ch>=0)input.moveBack(1);
+				if(ch>=0) {
+					input.moveBack(1);
+				}
 				TurtleObject subobj=readObject(true);
 				obj.getObjects().add(subobj);
 			}
@@ -152,12 +158,12 @@ public class TurtleParser implements IRDFParser {
 		int mark=input.setSoftMark();
 		if(ch<0)
 			throw new ParserException();
-		else if(ch=='<'){ // IRI Reference
+		else if(ch=='<')
 			return TurtleObject.fromTerm(
 					RDFTerm.fromIRI(readIriReference()));
-		} else if(acceptLiteral && (ch=='-' || ch=='+' || ch=='.' || (ch>='0' && ch<='9'))){ // start of number literal
+		else if(acceptLiteral && (ch=='-' || ch=='+' || ch=='.' || (ch>='0' && ch<='9')))
 			return TurtleObject.fromTerm(readNumberLiteral(ch));
-		} else if(acceptLiteral && (ch=='\'' || ch=='\"')){ // start of quote literal
+		else if(acceptLiteral && (ch=='\'' || ch=='\"')){ // start of quote literal
 			String str=readStringLiteral(ch);
 			return TurtleObject.fromTerm(finishStringLiteral(str));
 		} else if(ch=='_'){ // Blank Node Label
@@ -170,11 +176,11 @@ public class TurtleParser implements IRDFParser {
 				bnodeLabels.put(label,term);
 			}
 			return TurtleObject.fromTerm(term);
-		} else if(ch=='['){ // ANON or blankNodePropertyList
+		} else if(ch=='[')
 			return readBlankNodePropertyList();
-		} else if(ch=='('){ // collection
+		else if(ch=='(')
 			return readCollection();
-		} else if(ch==':'){ // prefixed name with current prefix
+		else if(ch==':'){ // prefixed name with current prefix
 			String scope=namespaces.get("");
 			if(scope==null)throw new ParserException();
 			return TurtleObject.fromTerm(
@@ -183,13 +189,13 @@ public class TurtleParser implements IRDFParser {
 			if(acceptLiteral && (ch=='t' || ch=='f')){
 				mark=input.setHardMark();
 				if(ch=='t' && input.read()=='r' && input.read()=='u' &&
-						input.read()=='e' && skipWhitespace()){
-					return TurtleObject.fromTerm(RDF_TRUE);       
-				} else if(ch=='f' && input.read()=='a' && input.read()=='l' &&
-						input.read()=='s' && input.read()=='e' && skipWhitespace()){
-					return TurtleObject.fromTerm(RDF_FALSE); 
-				} else {
-					input.setMarkPosition(mark); 
+						input.read()=='e' && skipWhitespace())
+					return TurtleObject.fromTerm(RDF_TRUE);
+				else if(ch=='f' && input.read()=='a' && input.read()=='l' &&
+						input.read()=='s' && input.read()=='e' && skipWhitespace())
+					return TurtleObject.fromTerm(RDF_FALSE);
+				else {
+					input.setMarkPosition(mark);
 				}
 			}
 			String prefix=readPrefix(ch);
@@ -206,13 +212,13 @@ public class TurtleParser implements IRDFParser {
 	private RDFTerm finishStringLiteral(String str) throws IOException {
 		int mark=input.setHardMark();
 		int ch=input.read();
-		if(ch=='@'){
+		if(ch=='@')
 			return RDFTerm.fromLangString(str,readLanguageTag());
-		} else if(ch=='^' && input.read()=='^'){
+		else if(ch=='^' && input.read()=='^'){
 			ch=input.read();
-			if(ch=='<'){ // IRI Reference
+			if(ch=='<')
 				return RDFTerm.fromTypedString(str,readIriReference());
-			} else if(ch==':'){ // prefixed name with current prefix
+			else if(ch==':'){ // prefixed name with current prefix
 				String scope=namespaces.get("");
 				if(scope==null)throw new ParserException();
 				return RDFTerm.fromTypedString(str,scope+readOptionalLocalName());
@@ -255,9 +261,11 @@ public class TurtleParser implements IRDFParser {
 				haveHyphen=true;
 				haveString=true;
 			} else {
-				if(c2>=0)input.moveBack(1);
+				if(c2>=0) {
+					input.moveBack(1);
+				}
 				if(hyphen||!haveString)throw new ParserException();
-				return ilist.toString();				
+				return ilist.toString();
 			}
 		}
 	}
@@ -273,19 +281,25 @@ public class TurtleParser implements IRDFParser {
 				input.setHardMark();
 				c2=input.read();
 				if(c2!=ch){
-					if(c2>=0)input.moveBack(1);
+					if(c2>=0) {
+						input.moveBack(1);
+					}
 					return "";
 				}
 				longQuote=true;
 				c2=input.read();
 			}
 			first=false;
-			if(!longQuote && (c2==0x0a || c2==0x0d)){
+			if(!longQuote && (c2==0x0a || c2==0x0d))
 				throw new ParserException();
-			} else if(c2=='\\'){
+			else if(c2=='\\'){
 				c2=readUnicodeEscape(true);
-				if(quotecount>=2)ilist.appendInt(ch);
-				if(quotecount>=1)ilist.appendInt(ch);
+				if(quotecount>=2) {
+					ilist.appendInt(ch);
+				}
+				if(quotecount>=1) {
+					ilist.appendInt(ch);
+				}
 				ilist.appendInt(c2);
 				quotecount=0;
 			} else if(c2==ch){
@@ -297,8 +311,12 @@ public class TurtleParser implements IRDFParser {
 			} else {
 				if(c2<0)
 					throw new ParserException();
-				if(quotecount>=2)ilist.appendInt(ch);
-				if(quotecount>=1)ilist.appendInt(ch);
+				if(quotecount>=2) {
+					ilist.appendInt(ch);
+				}
+				if(quotecount>=1) {
+					ilist.appendInt(ch);
+				}
 				ilist.appendInt(c2);
 				quotecount=0;
 			}
@@ -306,7 +324,7 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	// Reads a number literal starting with
-	// the given character (assumes it's plus, minus, 
+	// the given character (assumes it's plus, minus,
 	// a dot, or a digit)
 	private RDFTerm readNumberLiteral(int ch) throws IOException {
 		// buffer to hold the literal
@@ -325,7 +343,9 @@ public class TurtleParser implements IRDFParser {
 				haveDigits=false;
 				if(ch1=='+' || ch1=='-' || (ch1>='0' && ch1<='9')){
 					ilist.appendInt(ch1);
-					if(ch1>='0' && ch1<='9')haveDigits=true;
+					if(ch1>='0' && ch1<='9') {
+						haveDigits=true;
+					}
 				} else
 					throw new ParserException();
 				input.setHardMark();
@@ -335,7 +355,9 @@ public class TurtleParser implements IRDFParser {
 						haveDigits=true;
 						ilist.appendInt(ch1);
 					} else {
-						if(ch1>=0)input.moveBack(1);
+						if(ch1>=0) {
+							input.moveBack(1);
+						}
 						if(!haveDigits)throw new ParserException();
 						return RDFTerm.fromTypedString(ilist.toString(),
 								"http://www.w3.org/2001/XMLSchema#double");
@@ -343,7 +365,7 @@ public class TurtleParser implements IRDFParser {
 				}
 			} else if(ch1>='0' && ch1<='9'){
 				haveDigits=true;
-				ilist.appendInt(ch1);        
+				ilist.appendInt(ch1);
 			} else if(!haveDot && ch1=='.'){
 				haveDot=true;
 				// check for non-digit and non-E
@@ -362,23 +384,24 @@ public class TurtleParser implements IRDFParser {
 				}
 				ilist.appendInt(ch1);
 			} else { // no more digits
-				if(ch1>=0)input.moveBack(1);
+				if(ch1>=0) {
+					input.moveBack(1);
+				}
 				if(!haveDigits)
 					throw new ParserException();
 				return RDFTerm.fromTypedString(ilist.toString(),
 						haveDot ? "http://www.w3.org/2001/XMLSchema#decimal" :
 						"http://www.w3.org/2001/XMLSchema#integer");
 			}
-		}    
+		}
 	}
 
 	private String readBlankNodeLabel() throws IOException {
 		IntList ilist=new IntList();
 		int startChar=input.read();
 		if(!isNameStartCharU(startChar) &&
-				(startChar<'0' || startChar>'9')){
+				(startChar<'0' || startChar>'9'))
 			throw new ParserException();
-		}
 		ilist.appendInt(startChar);
 		boolean lastIsPeriod=false;
 		input.setSoftMark();
@@ -399,7 +422,9 @@ public class TurtleParser implements IRDFParser {
 				ilist.appendInt(ch);
 				lastIsPeriod=false;
 			} else {
-				if(ch>=0)input.moveBack(1);
+				if(ch>=0) {
+					input.moveBack(1);
+				}
 				if(lastIsPeriod)
 					throw new ParserException();
 				return ilist.toString();
@@ -423,9 +448,8 @@ public class TurtleParser implements IRDFParser {
 			else if(ch=='\\'){
 				ch=readUnicodeEscape(false);
 			}
-			if(ch<=0x20 || isChar(ch, "><\\\"{}|^`")){
+			if(ch<=0x20 || isChar(ch, "><\\\"{}|^`"))
 				throw new ParserException();
-			}
 			ilist.appendInt(ch);
 		}
 	}
@@ -446,12 +470,10 @@ public class TurtleParser implements IRDFParser {
 					throw new ParserException();
 				return ilist.toString();
 			}
-			else if(first && !isNameStartChar(ch)){
+			else if(first && !isNameStartChar(ch))
 				throw new ParserException();
-			}
-			else if(ch!='.' && !isNameChar(ch)){
+			else if(ch!='.' && !isNameChar(ch))
 				throw new ParserException();
-			}
 			first=false;
 			ilist.appendInt(ch);
 			lastIsPeriod=(ch=='.');
@@ -482,23 +504,23 @@ public class TurtleParser implements IRDFParser {
 			if(a<0||b<0||c<0||d<0)
 				throw new ParserException();
 			ch=(a<<12)|(b<<8)|(c<<4)|(d);
-		} else if(extended && ch=='t'){
+		} else if(extended && ch=='t')
 			return '\t';
-		} else if(extended && ch=='b'){
+		else if(extended && ch=='b')
 			return '\b';
-		} else if(extended && ch=='n'){
+		else if(extended && ch=='n')
 			return '\n';
-		} else if(extended && ch=='r'){
+		else if(extended && ch=='r')
 			return '\r';
-		} else if(extended && ch=='f'){
+		else if(extended && ch=='f')
 			return '\f';
-		} else if(extended && ch=='\''){
+		else if(extended && ch=='\'')
 			return '\'';
-		} else if(extended && ch=='\\'){
+		else if(extended && ch=='\\')
 			return '\\';
-		} else if(extended && ch=='"'){
+		else if(extended && ch=='"')
 			return '\"';
-		} else throw new ParserException();
+		else throw new ParserException();
 		// Reject surrogate code points
 		// as Unicode escapes
 		if(ch>=0xD800 && ch<=0xDFFF)
@@ -514,7 +536,9 @@ public class TurtleParser implements IRDFParser {
 			if(haveObject){
 				ch=input.read();
 				if(ch!=','){
-					if(ch>=0)input.moveBack(1);
+					if(ch>=0) {
+						input.moveBack(1);
+					}
 					break;
 				}
 				skipWhitespace();
@@ -547,7 +571,9 @@ public class TurtleParser implements IRDFParser {
 			if(haveObject){
 				ch=input.read();
 				if(ch!=','){
-					if(ch>=0)input.moveBack(1);
+					if(ch>=0) {
+						input.moveBack(1);
+					}
 					break;
 				}
 				skipWhitespace();
@@ -597,9 +623,8 @@ public class TurtleParser implements IRDFParser {
 					emitRDFTriple(blankNode,prop.pred,prop.obj,triples);
 				}
 				return;
-			} else if(ch<0){
+			} else if(ch<0)
 				throw new ParserException();
-			}
 			input.moveBack(1);
 			readPredicateObjectList(triples);
 		}
@@ -620,7 +645,7 @@ public class TurtleParser implements IRDFParser {
 			if(ch=='%'){
 				int a=input.read();
 				int b=input.read();
-				if(toHexValue(a)<0 || 
+				if(toHexValue(a)<0 ||
 						toHexValue(b)<0)throw new ParserException();
 				ilist.appendInt(ch);
 				ilist.appendInt(a);
@@ -640,13 +665,13 @@ public class TurtleParser implements IRDFParser {
 			if(first){
 				if(!isNameStartCharU(ch) && ch!=':' && (ch<'0' || ch>'9')){
 					input.moveBack(1);
-					return ilist.toString();					
+					return ilist.toString();
 				}
 			} else {
 				if(!isNameChar(ch) && ch!=':' && ch!='.'){
 					input.moveBack(1);
 					if(lastIsPeriod)throw new ParserException();
-					return ilist.toString();					
+					return ilist.toString();
 				}
 			}
 			lastIsPeriod=(ch=='.');
@@ -687,9 +712,9 @@ public class TurtleParser implements IRDFParser {
 		RDFTerm predicate=null;
 		if(ch=='a'){
 			mark=input.setHardMark();
-			if(skipWhitespace()){
+			if(skipWhitespace())
 				return RDF_TYPE;
-			} else {
+			else {
 				input.setMarkPosition(mark);
 				String prefix=readPrefix('a');
 				String scope=namespaces.get(prefix);
@@ -718,9 +743,9 @@ public class TurtleParser implements IRDFParser {
 		} else {
 			input.setMarkPosition(mark);
 			return null;
-		}    
+		}
 	}
-	
+
 
 
 	private TurtleObject readBlankNodePropertyList() throws IOException {
@@ -738,11 +763,15 @@ public class TurtleParser implements IRDFParser {
 						skipWhitespace();
 						haveSemicolon=true;
 					} else {
-						if(ch>=0)input.moveBack(1);
+						if(ch>=0) {
+							input.moveBack(1);
+						}
 						break;
 					}
 				}
-				if(!haveSemicolon)break;
+				if(!haveSemicolon) {
+					break;
+				}
 			}
 			RDFTerm pred=readPredicate();
 			if(pred==null){
@@ -772,19 +801,24 @@ public class TurtleParser implements IRDFParser {
 						skipWhitespace();
 						haveSemicolon=true;
 					} else {
-						if(ch>=0)input.moveBack(1);
+						if(ch>=0) {
+							input.moveBack(1);
+						}
 						break;
 					}
 				}
-				if(!haveSemicolon)break;
+				if(!haveSemicolon) {
+					break;
+				}
 			}
 			curPredicate=readPredicate();
 			//DebugUtility.log("predobjlist %s",curPredicate);
 			if(curPredicate==null){
 				if(!havePredObject)
 					throw new ParserException();
-				else
+				else {
 					break;
+				}
 			}
 			// Read object
 			havePredObject=true;
@@ -820,7 +854,7 @@ public class TurtleParser implements IRDFParser {
 		bnodeLabels.put(label,node);
 		return node;
 	}
-	
+
 	private String suggestBlankNodeName(String node, int[] nodeindex){
 		boolean validnode=(node.length()>0);
 		// Check if the blank node label is valid
@@ -847,7 +881,7 @@ public class TurtleParser implements IRDFParser {
 			nodeindex[0]++;
 		}
 	}
-		
+
 	// Replaces certain blank nodes with blank nodes whose
 	// names meet the N-Triples requirements
 	private void replaceBlankNodes(Set<RDFTriple> triples){
@@ -889,9 +923,10 @@ public class TurtleParser implements IRDFParser {
 				}
 			}
 			if(changed){
-				changedTriples.add(new RDFTriple[]{triple,
+				RDFTriple[] newTriple=new RDFTriple[]{triple,
 						new RDFTriple(subj,triple.getPredicate(),obj)
-				});
+				};
+				changedTriples.add(newTriple);
 			}
 		}
 		for(RDFTriple[] triple : changedTriples){
@@ -900,7 +935,7 @@ public class TurtleParser implements IRDFParser {
 		}
 	}
 
-	private void emitRDFTriple(RDFTerm subj, RDFTerm pred, 
+	private void emitRDFTriple(RDFTerm subj, RDFTerm pred,
 			TurtleObject obj, Set<RDFTriple> triples){
 		if(obj.kind==TurtleObject.SIMPLE){
 			emitRDFTriple(subj,pred,obj.term,triples);
@@ -938,7 +973,7 @@ public class TurtleParser implements IRDFParser {
 		}
 	}
 
-	private void emitRDFTriple(TurtleObject subj, RDFTerm pred, 
+	private void emitRDFTriple(TurtleObject subj, RDFTerm pred,
 			TurtleObject obj, Set<RDFTriple> triples){
 		if(subj.kind==TurtleObject.SIMPLE){
 			emitRDFTriple(subj.term,pred,obj,triples);
@@ -1027,6 +1062,7 @@ public class TurtleParser implements IRDFParser {
 				(ch>=0x10000 && ch<=0xeffff);
 	}
 
+	@Override
 	public Set<RDFTriple> parse() throws IOException {
 		Set<RDFTriple> triples=new HashSet<RDFTriple>();
 		while(true){
@@ -1086,9 +1122,8 @@ public class TurtleParser implements IRDFParser {
 		baseURI=readIriReference();
 		if(!sparql){
 			skipWhitespace();
-			if(input.read()!='.'){
+			if(input.read()!='.')
 				throw new ParserException();
-			}
 		} else {
 			skipWhitespace();
 		}
@@ -1103,9 +1138,8 @@ public class TurtleParser implements IRDFParser {
 		namespaces.put(prefix, iri);
 		if(!sparql){
 			skipWhitespace();
-			if(input.read()!='.'){
+			if(input.read()!='.')
 				throw new ParserException();
-			}
 		} else {
 			skipWhitespace();
 		}

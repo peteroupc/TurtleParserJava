@@ -11,7 +11,7 @@ public final class RDFTriple {
 		result = prime * result + ((subject == null) ? 0 : subject.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public String toString(){
 		return subject.toString()+" "+predicate.toString()+" "+object.toString()+" .";
@@ -49,7 +49,7 @@ public final class RDFTriple {
 		setPredicate(predicate);
 		setObject(object);
 	}
-	
+
 	public RDFTriple(RDFTriple triple){
 		if(triple==null)throw new NullPointerException("triple");
 		setSubject(triple.subject);

@@ -32,9 +32,8 @@ public final class StringCharacterInput implements ICharacterInput {
 				// Get the Unicode code point for the surrogate pair
 				c=0x10000+(c-0xD800)*0x400+(str.charAt(pos+1)-0xDC00);
 				pos++;
-			} else if(strict && c>=0xD800 && c<=0xDFFF){
+			} else if(strict && c>=0xD800 && c<=0xDFFF)
 				throw new MalformedInputException(1);
-			}
 			buf[offset]=c;
 			offset++;
 			unitCount--;
@@ -53,9 +52,8 @@ public final class StringCharacterInput implements ICharacterInput {
 				// Get the Unicode code point for the surrogate pair
 				c=0x10000+(c-0xD800)*0x400+(str.charAt(pos+1)-0xDC00);
 				pos++;
-			} else if(strict && c>=0xD800 && c<=0xDFFF){
+			} else if(strict && c>=0xD800 && c<=0xDFFF)
 				throw new MalformedInputException(1);
-			}
 			pos++;
 			return c;
 		}

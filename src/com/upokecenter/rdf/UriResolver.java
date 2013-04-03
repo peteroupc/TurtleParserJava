@@ -26,10 +26,12 @@ final class UriResolver {
 				index++;
 				break;
 			}
-			
+
 			index++;
 		}
-		if(!scheme)index=0;
+		if(!scheme) {
+			index=0;
+		}
 		if(index+2<=ref.length() && ref.charAt(index)=='/' && ref.charAt(index+1)=='/'){
 			// authority
 			ret[2]=index+2;
@@ -53,7 +55,7 @@ final class UriResolver {
 				ret[5]=index;
 				break;
 			}
-			index++;			
+			index++;
 		}
 		if(ret[4]>ret[5]){
 			ret[4]=0;
@@ -68,7 +70,7 @@ final class UriResolver {
 				ret[7]=index;
 				break;
 			}
-			index++;				
+			index++;
 		}
 		// fragment
 		ret[8]=index+1;
@@ -83,7 +85,7 @@ final class UriResolver {
 		}
 		return ret;
 	}
-	
+
 	private static void appendScheme(
 			StringBuilder builder, String ref, int[] segments){
 		if(segments[0]>=0){
@@ -116,19 +118,18 @@ final class UriResolver {
 			builder.append(ref.substring(segments[8],segments[9]));
 		}
 	}
-	
+
 	private static String pathParent(String ref, int startIndex, int endIndex){
 		if(startIndex>endIndex)return "";
 		endIndex--;
 		while(endIndex>=startIndex){
-			if(ref.charAt(endIndex)=='/'){
+			if(ref.charAt(endIndex)=='/')
 				return ref.substring(startIndex,endIndex+1);
-			}
 			endIndex--;
 		}
 		return "";
 	}
-	
+
 	private static String normalizePath(String path){
 		int len=path.length();
 		if(len==0 || path.equals("..") || path.equals("."))
@@ -142,7 +143,7 @@ final class UriResolver {
 			if((index+3<=len && c=='/' &&
 					path.charAt(index+1)=='.' &&
 					path.charAt(index+2)=='/') ||
-			   (index+2==len && c=='.' &&
+					(index+2==len && c=='.' &&
 					path.charAt(index+1)=='.')){
 				// begins with "/./" or is "..";
 				// move index by 2
@@ -157,7 +158,7 @@ final class UriResolver {
 				continue;
 			} else if((index+2<=len && c=='.' &&
 					path.charAt(index+1)=='/') ||
-				(index+1==len && c=='.')){
+					(index+1==len && c=='.')){
 				// begins with "./" or is ".";
 				// move index by 1
 				index+=1;
@@ -179,10 +180,12 @@ final class UriResolver {
 					}
 					index2--;
 				}
-				if(index2<0)index2=0;
+				if(index2<0) {
+					index2=0;
+				}
 				builder.setLength(index2);
 				builder.append('/');
-				break;			
+				break;
 			} else if((index+4<=len && c=='/' &&
 					path.charAt(index+1)=='.' &&
 					path.charAt(index+2)=='.' &&
@@ -195,10 +198,12 @@ final class UriResolver {
 					}
 					index2--;
 				}
-				if(index2<0)index2=0;
+				if(index2<0) {
+					index2=0;
+				}
 				builder.setLength(index2);
 				index+=3;
-				continue;			
+				continue;
 			} else {
 				builder.append(c);
 				index++;
@@ -210,12 +215,12 @@ final class UriResolver {
 			StringBuilder builder, String ref, int[] segments){
 		builder.append(normalizePath(ref.substring(segments[4],segments[5])));
 	}
-	
+
 	public static boolean hasScheme(String ref){
 		int[] segments=splitUri(ref);
 		return segments[0]>=0;
 	}
-	
+
 	public static String relativeResolve(String ref, String base){
 		int[] segments=splitUri(ref);
 		int[] segmentsBase=splitUri(base);

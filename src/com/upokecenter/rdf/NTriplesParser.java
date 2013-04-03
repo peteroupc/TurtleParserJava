@@ -36,9 +36,8 @@ public final class NTriplesParser implements IRDFParser {
 			if(unitCount==0)return 0;
 			for(int i=0;i<unitCount;i++){
 				int c=read();
-				if(c<0){
+				if(c<0)
 					return i==0 ? -1 : i;
-				}
 				buf[offset++]=c;
 			}
 			return unitCount;
@@ -49,7 +48,7 @@ public final class NTriplesParser implements IRDFParser {
 			int c=stream.read();
 			if(c>=0x80)throw new IOException("Invalid ASCII");
 			return c;
-		}		
+		}
 	}
 
 	StackableCharacterInput input;
@@ -74,7 +73,9 @@ public final class NTriplesParser implements IRDFParser {
 		while(true){
 			int ch=input.read();
 			if(ch!=0x09 && ch!=0x20){
-				if(ch>=0)input.moveBack(1);
+				if(ch>=0) {
+					input.moveBack(1);
+				}
 				return haveWhitespace;
 			}
 			haveWhitespace=true;
@@ -86,9 +87,9 @@ public final class NTriplesParser implements IRDFParser {
 		int ch=input.read();
 		if(ch<0)
 			throw new ParserException();
-		else if(ch=='<'){ // IRI Reference
+		else if(ch=='<')
 			return (RDFTerm.fromIRI(readIriReference()));
-		} else if(acceptLiteral && (ch=='\"')){ // start of quote literal
+		else if(acceptLiteral && (ch=='\"')){ // start of quote literal
 			String str=readStringLiteral(ch);
 			return (finishStringLiteral(str));
 		} else if(ch=='_'){ // Blank Node Label
@@ -101,21 +102,20 @@ public final class NTriplesParser implements IRDFParser {
 				bnodeLabels.put(label,term);
 			}
 			return (term);
-		} else {
+		} else
 			throw new ParserException();
-		}
 	}
 
 	private RDFTerm finishStringLiteral(String str) throws IOException {
 		int mark=input.setHardMark();
 		int ch=input.read();
-		if(ch=='@'){
+		if(ch=='@')
 			return RDFTerm.fromLangString(str,readLanguageTag());
-		} else if(ch=='^' && input.read()=='^'){
+		else if(ch=='^' && input.read()=='^'){
 			ch=input.read();
-			if(ch=='<'){ // IRI Reference
+			if(ch=='<')
 				return RDFTerm.fromTypedString(str,readIriReference());
-			} else throw new ParserException();
+			else throw new ParserException();
 		} else {
 			input.setMarkPosition(mark);
 			return RDFTerm.fromTypedString(str);
@@ -145,9 +145,11 @@ public final class NTriplesParser implements IRDFParser {
 				haveHyphen=true;
 				haveString=true;
 			} else {
-				if(c2>=0)input.moveBack(1);
+				if(c2>=0) {
+					input.moveBack(1);
+				}
 				if(hyphen||!haveString)throw new ParserException();
-				return ilist.toString();				
+				return ilist.toString();
 			}
 		}
 	}
@@ -156,14 +158,14 @@ public final class NTriplesParser implements IRDFParser {
 		IntList ilist=new IntList();
 		while(true){
 			int c2=input.read();
-			if((c2<0x20 || c2>0x7e)){
+			if((c2<0x20 || c2>0x7e))
 				throw new ParserException();
-			} else if(c2=='\\'){
+			else if(c2=='\\'){
 				c2=readUnicodeEscape(true);
 				ilist.appendInt(c2);
-			} else if(c2==ch){
+			} else if(c2==ch)
 				return ilist.toString();
-			} else {
+			else {
 				ilist.appendInt(c2);
 			}
 		}
@@ -173,9 +175,8 @@ public final class NTriplesParser implements IRDFParser {
 		IntList ilist=new IntList();
 		int startChar=input.read();
 		if(!((startChar>='A' && startChar<='Z') ||
-				(startChar>='a' && startChar<='z'))){
+				(startChar>='a' && startChar<='z')))
 			throw new ParserException();
-		}
 		ilist.appendInt(startChar);
 		input.setSoftMark();
 		while(true){
@@ -185,43 +186,47 @@ public final class NTriplesParser implements IRDFParser {
 					(ch>='0' && ch<='9')){
 				ilist.appendInt(ch);
 			} else {
-				if(ch>=0)input.moveBack(1);
+				if(ch>=0) {
+					input.moveBack(1);
+				}
 				return ilist.toString();
 			}
 		}
 	}
 
-	
+
 	public static boolean isChar(int c, String asciiChars){
 		return (c>=0 && c<=0x7F && asciiChars.indexOf((char)c)>=0);
 	}
-	
+
 	private String readIriReference() throws IOException {
 		IntList ilist=new IntList();
 		boolean haveString=false;
 		boolean colon=false;
 		while(true){
 			int c2=input.read();
-			if((c2<=0x20 || c2>0x7e) || isChar(c2, "<\"{}|^`")){
+			if((c2<=0x20 || c2>0x7e) || isChar(c2, "<\"{}|^`"))
 				throw new ParserException();
-			} else if(c2=='\\'){
+			else if(c2=='\\'){
 				c2=readUnicodeEscape(true);
 				if(c2<=0x20 || (c2>=0x7F && c2<=0x9F) || isChar(c2, "<\"{}|\\^`"))
 					throw new ParserException();
-				if(c2==':')
+				if(c2==':') {
 					colon=true;
+				}
 				ilist.appendInt(c2);
 				haveString=true;
 			} else if(c2=='>'){
 				if(!haveString || !colon)
 					throw new ParserException();
 				return ilist.toString();
-			} else if(c2=='\"'){
+			} else if(c2=='\"')
 				// Should have been escaped
 				throw new ParserException();
-			} else {
-				if(c2==':')
+			else {
+				if(c2==':') {
 					colon=true;
+				}
 				ilist.appendInt(c2);
 				haveString=true;
 			}
@@ -252,22 +257,22 @@ public final class NTriplesParser implements IRDFParser {
 			int d=toHexValue(input.read());
 			if(a<0||b<0||c<0||d<0)
 				throw new ParserException();
-			ch=(a<<12)|(b<<8)|(c<<4)|(d);		
+			ch=(a<<12)|(b<<8)|(c<<4)|(d);
 			// NOTE: The following makes the code too strict
 			//if(ch==0x09 || ch==0x0a || ch==0x0d ||
 			//		(ch>=0x20 && ch<=0x7E))
 			//	throw new ParserException();
-		} else if(ch=='t'){
+		} else if(ch=='t')
 			return '\t';
-		} else if(extended && ch=='n'){
+		else if(extended && ch=='n')
 			return '\n';
-		} else if(extended && ch=='r'){
+		else if(extended && ch=='r')
 			return '\r';
-		} else if(extended && ch=='\\'){
+		else if(extended && ch=='\\')
 			return '\\';
-		} else if(extended && ch=='"'){
+		else if(extended && ch=='"')
 			return '\"';
-		} else throw new ParserException();
+		else throw new ParserException();
 		// Reject surrogate code points
 		// as Unicode escapes
 		if(ch>=0xD800 && ch<=0xDFFF)
@@ -310,9 +315,10 @@ public final class NTriplesParser implements IRDFParser {
 				input.moveBack(1);
 			}
 		} else
-			throw new ParserException();		
+			throw new ParserException();
 	}
 
+	@Override
 	public Set<RDFTriple> parse() throws IOException {
 		Set<RDFTriple> rdf=new HashSet<RDFTriple>();
 		while(true){
@@ -326,9 +332,8 @@ public final class NTriplesParser implements IRDFParser {
 					if(ch==0x0a || ch==0x0d){
 						endOfLine(ch);
 						break;
-					} else if(ch<0x20 || ch>0x7e){
+					} else if(ch<0x20 || ch>0x7e)
 						throw new ParserException();
-					}
 				}
 			} else if(ch==0x0a || ch==0x0d){
 				endOfLine(ch);
