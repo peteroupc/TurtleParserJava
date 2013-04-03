@@ -291,7 +291,6 @@ public final class NTriplesParser implements IRDFParser {
 		skipWhitespace();
 		RDFTriple ret=new RDFTriple(subject,predicate,obj);
 		endOfLine(input.read());
-		System.out.println(ret);
 		return ret;
 	}
 

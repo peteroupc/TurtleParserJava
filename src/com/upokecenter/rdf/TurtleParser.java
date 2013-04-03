@@ -695,25 +695,25 @@ public class TurtleParser implements IRDFParser {
 				String scope=namespaces.get(prefix);
 				if(scope==null)throw new ParserException();
 				predicate=RDFTerm.fromIRI(scope+readOptionalLocalName());
-				if(!skipWhitespace())throw new ParserException();
+				skipWhitespace();
 				return predicate;
 			}
 		} else if(ch=='<'){
 			predicate=RDFTerm.fromIRI(readIriReference());
-			if(!skipWhitespace())throw new ParserException();
+			skipWhitespace();
 			return predicate;
 		} else if(ch==':'){ // prefixed name with current prefix
 			String scope=namespaces.get("");
 			if(scope==null)throw new ParserException();
 			predicate=RDFTerm.fromIRI(scope+readOptionalLocalName());
-			if(!skipWhitespace())throw new ParserException();
+			skipWhitespace();
 			return predicate;
 		} else if(isNameStartChar(ch)){ // prefix
 			String prefix=readPrefix(ch);
 			String scope=namespaces.get(prefix);
 			if(scope==null)throw new ParserException();
 			predicate=RDFTerm.fromIRI(scope+readOptionalLocalName());
-			if(!skipWhitespace())throw new ParserException();
+			skipWhitespace();
 			return predicate;
 		} else {
 			input.setMarkPosition(mark);
@@ -1055,8 +1055,7 @@ public class TurtleParser implements IRDFParser {
 				int c2=0;
 				if(((c2=input.read())=='A' || c2=='a') &&
 						((c2=input.read())=='S' || c2=='s') &&
-						((c2=input.read())=='E' || c2=='e') &&
-						skipWhitespace()){
+						((c2=input.read())=='E' || c2=='e') && skipWhitespace()){
 					readBase(true);
 					continue;
 				} else {
@@ -1068,8 +1067,7 @@ public class TurtleParser implements IRDFParser {
 						((c2=input.read())=='E' || c2=='e') &&
 						((c2=input.read())=='F' || c2=='f') &&
 						((c2=input.read())=='I' || c2=='i') &&
-						((c2=input.read())=='X' || c2=='x') &&
-						skipWhitespace()){
+						((c2=input.read())=='X' || c2=='x') && skipWhitespace()){
 					readPrefixStatement(true);
 					continue;
 				} else {
@@ -1098,8 +1096,7 @@ public class TurtleParser implements IRDFParser {
 
 	private void readPrefixStatement(boolean sparql) throws IOException {
 		String prefix=readPrefix(-1);
-		if(!skipWhitespace())
-			throw new ParserException();
+		skipWhitespace();
 		if(input.read()!='<')
 			throw new ParserException();
 		String iri=readIriReference();
