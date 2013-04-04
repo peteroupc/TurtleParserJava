@@ -1,6 +1,8 @@
 package com.upokecenter.rdf;
 
 import java.io.IOException;
+//Written by Peter Occil, 2013. In the public domain.
+//Public domain dedication: http://creativecommons.org/publicdomain/zero/1.0/
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,10 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.upokecenter.util.IntList;
-import com.upokecenter.util.StackableCharacterInput;
-import com.upokecenter.util.StringCharacterInput;
-import com.upokecenter.util.Utf8CharacterInput;
+import com.upokecenter.io.StackableCharacterInput;
+import com.upokecenter.io.StringCharacterInput;
+import com.upokecenter.io.Utf8CharacterInput;
 
 /**
  * 
@@ -235,7 +236,7 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	private String readLanguageTag() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean hyphen=false;
 		boolean haveHyphen=false;
 		boolean haveString=false;
@@ -243,20 +244,20 @@ public class TurtleParser implements IRDFParser {
 		while(true){
 			int c2=input.read();
 			if(c2>='A' && c2<='Z'){
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(c2>='a' && c2<='z'){
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(haveHyphen && (c2>='0' && c2<='9')){
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(c2=='-'){
 				if(hyphen||!haveString)throw new ParserException();
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				hyphen=true;
 				haveHyphen=true;
 				haveString=true;
@@ -271,7 +272,7 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	private String readStringLiteral(int ch) throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean first=true;
 		boolean longQuote=false;
 		int quotecount=0;
@@ -295,12 +296,12 @@ public class TurtleParser implements IRDFParser {
 			else if(c2=='\\'){
 				c2=readUnicodeEscape(true);
 				if(quotecount>=2) {
-					ilist.appendInt(ch);
+					ilist.appendCodePoint(ch);
 				}
 				if(quotecount>=1) {
-					ilist.appendInt(ch);
+					ilist.appendCodePoint(ch);
 				}
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				quotecount=0;
 			} else if(c2==ch){
 				if(!longQuote)
@@ -312,12 +313,12 @@ public class TurtleParser implements IRDFParser {
 				if(c2<0)
 					throw new ParserException();
 				if(quotecount>=2) {
-					ilist.appendInt(ch);
+					ilist.appendCodePoint(ch);
 				}
 				if(quotecount>=1) {
-					ilist.appendInt(ch);
+					ilist.appendCodePoint(ch);
 				}
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				quotecount=0;
 			}
 		}
@@ -328,9 +329,9 @@ public class TurtleParser implements IRDFParser {
 	// a dot, or a digit)
 	private RDFTerm readNumberLiteral(int ch) throws IOException {
 		// buffer to hold the literal
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		// include the first character
-		ilist.appendInt(ch);
+		ilist.appendCodePoint(ch);
 		boolean haveDigits=(ch>='0' && ch<='9');
 		boolean haveDot=(ch=='.');
 		input.setHardMark();
@@ -338,11 +339,11 @@ public class TurtleParser implements IRDFParser {
 			int ch1=input.read();
 			if(haveDigits && (ch1=='e' || ch1=='E')){
 				// Parse exponent
-				ilist.appendInt(ch1);
+				ilist.appendCodePoint(ch1);
 				ch1=input.read();
 				haveDigits=false;
 				if(ch1=='+' || ch1=='-' || (ch1>='0' && ch1<='9')){
-					ilist.appendInt(ch1);
+					ilist.appendCodePoint(ch1);
 					if(ch1>='0' && ch1<='9') {
 						haveDigits=true;
 					}
@@ -353,7 +354,7 @@ public class TurtleParser implements IRDFParser {
 					ch1=input.read();
 					if(ch1>='0' && ch1<='9'){
 						haveDigits=true;
-						ilist.appendInt(ch1);
+						ilist.appendCodePoint(ch1);
 					} else {
 						if(ch1>=0) {
 							input.moveBack(1);
@@ -365,7 +366,7 @@ public class TurtleParser implements IRDFParser {
 				}
 			} else if(ch1>='0' && ch1<='9'){
 				haveDigits=true;
-				ilist.appendInt(ch1);
+				ilist.appendCodePoint(ch1);
 			} else if(!haveDot && ch1=='.'){
 				haveDot=true;
 				// check for non-digit and non-E
@@ -382,7 +383,7 @@ public class TurtleParser implements IRDFParser {
 				} else {
 					input.moveBack(1);
 				}
-				ilist.appendInt(ch1);
+				ilist.appendCodePoint(ch1);
 			} else { // no more digits
 				if(ch1>=0) {
 					input.moveBack(1);
@@ -397,12 +398,12 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	private String readBlankNodeLabel() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		int startChar=input.read();
 		if(!isNameStartCharU(startChar) &&
 				(startChar<'0' || startChar>'9'))
 			throw new ParserException();
-		ilist.appendInt(startChar);
+		ilist.appendCodePoint(startChar);
 		boolean lastIsPeriod=false;
 		input.setSoftMark();
 		while(true){
@@ -416,10 +417,10 @@ public class TurtleParser implements IRDFParser {
 				} else {
 					input.moveBack(1);
 				}
-				ilist.appendInt(ch);
+				ilist.appendCodePoint(ch);
 				lastIsPeriod=true;
 			} else if(isNameChar(ch)){
-				ilist.appendInt(ch);
+				ilist.appendCodePoint(ch);
 				lastIsPeriod=false;
 			} else {
 				if(ch>=0) {
@@ -433,7 +434,7 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	private String readIriReference() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		while(true){
 			int ch=input.read();
 			if(ch<0)
@@ -450,15 +451,15 @@ public class TurtleParser implements IRDFParser {
 			}
 			if(ch<=0x20 || isChar(ch, "><\\\"{}|^`"))
 				throw new ParserException();
-			ilist.appendInt(ch);
+			ilist.appendCodePoint(ch);
 		}
 	}
 	private String readPrefix(int startChar) throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean lastIsPeriod=false;
 		boolean first=true;
 		if(startChar>=0){
-			ilist.appendInt(startChar);
+			ilist.appendCodePoint(startChar);
 			first=false;
 		}
 		while(true){
@@ -475,7 +476,7 @@ public class TurtleParser implements IRDFParser {
 			else if(ch!='.' && !isNameChar(ch))
 				throw new ParserException();
 			first=false;
-			ilist.appendInt(ch);
+			ilist.appendCodePoint(ch);
 			lastIsPeriod=(ch=='.');
 		}
 	}
@@ -634,7 +635,7 @@ public class TurtleParser implements IRDFParser {
 	}
 
 	private String readOptionalLocalName() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean lastIsPeriod=false;
 		boolean first=true;
 		input.setSoftMark();
@@ -647,16 +648,16 @@ public class TurtleParser implements IRDFParser {
 				int b=input.read();
 				if(toHexValue(a)<0 ||
 						toHexValue(b)<0)throw new ParserException();
-				ilist.appendInt(ch);
-				ilist.appendInt(a);
-				ilist.appendInt(b);
+				ilist.appendCodePoint(ch);
+				ilist.appendCodePoint(a);
+				ilist.appendCodePoint(b);
 				lastIsPeriod=false;
 				first=false;
 				continue;
 			} else if(ch=='\\'){
 				ch=input.read();
 				if(isChar(ch,"_~.-!$&'()*+,;=/?#@%")){
-					ilist.appendInt(ch);
+					ilist.appendCodePoint(ch);
 				} else throw new ParserException();
 				lastIsPeriod=false;
 				first=false;
@@ -689,7 +690,7 @@ public class TurtleParser implements IRDFParser {
 				}
 			}
 			first=false;
-			ilist.appendInt(ch);
+			ilist.appendCodePoint(ch);
 		}
 
 	}

@@ -1,3 +1,5 @@
+// Written by Peter Occil, 2013. In the public domain.
+// Public domain dedication: http://creativecommons.org/publicdomain/zero/1.0/
 package com.upokecenter.rdf;
 
 import java.io.IOException;
@@ -7,10 +9,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.upokecenter.util.ICharacterInput;
-import com.upokecenter.util.IntList;
-import com.upokecenter.util.StackableCharacterInput;
-import com.upokecenter.util.StringCharacterInput;
+import com.upokecenter.io.ICharacterInput;
+import com.upokecenter.io.StackableCharacterInput;
+import com.upokecenter.io.StringCharacterInput;
 
 public final class NTriplesParser implements IRDFParser {
 
@@ -123,7 +124,7 @@ public final class NTriplesParser implements IRDFParser {
 	}
 
 	private String readLanguageTag() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean hyphen=false;
 		boolean haveHyphen=false;
 		boolean haveString=false;
@@ -131,16 +132,16 @@ public final class NTriplesParser implements IRDFParser {
 		while(true){
 			int c2=input.read();
 			if(c2>='a' && c2<='z'){
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(haveHyphen && (c2>='0' && c2<='9')){
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 				hyphen=false;
 			} else if(c2=='-'){
 				if(hyphen||!haveString)throw new ParserException();
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				hyphen=true;
 				haveHyphen=true;
 				haveString=true;
@@ -155,36 +156,36 @@ public final class NTriplesParser implements IRDFParser {
 	}
 
 	private String readStringLiteral(int ch) throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		while(true){
 			int c2=input.read();
 			if((c2<0x20 || c2>0x7e))
 				throw new ParserException();
 			else if(c2=='\\'){
 				c2=readUnicodeEscape(true);
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 			} else if(c2==ch)
 				return ilist.toString();
 			else {
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 			}
 		}
 	}
 
 	private String readBlankNodeLabel() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		int startChar=input.read();
 		if(!((startChar>='A' && startChar<='Z') ||
 				(startChar>='a' && startChar<='z')))
 			throw new ParserException();
-		ilist.appendInt(startChar);
+		ilist.appendCodePoint(startChar);
 		input.setSoftMark();
 		while(true){
 			int ch=input.read();
 			if((ch>='A' && ch<='Z') ||
 					(ch>='a' && ch<='z') ||
 					(ch>='0' && ch<='9')){
-				ilist.appendInt(ch);
+				ilist.appendCodePoint(ch);
 			} else {
 				if(ch>=0) {
 					input.moveBack(1);
@@ -200,7 +201,7 @@ public final class NTriplesParser implements IRDFParser {
 	}
 
 	private String readIriReference() throws IOException {
-		IntList ilist=new IntList();
+		StringBuilder ilist=new StringBuilder();
 		boolean haveString=false;
 		boolean colon=false;
 		while(true){
@@ -214,7 +215,7 @@ public final class NTriplesParser implements IRDFParser {
 				if(c2==':') {
 					colon=true;
 				}
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 			} else if(c2=='>'){
 				if(!haveString || !colon)
@@ -227,7 +228,7 @@ public final class NTriplesParser implements IRDFParser {
 				if(c2==':') {
 					colon=true;
 				}
-				ilist.appendInt(c2);
+				ilist.appendCodePoint(c2);
 				haveString=true;
 			}
 		}
