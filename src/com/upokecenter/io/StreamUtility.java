@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -13,11 +13,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
+import com.upokecenter.util.DataUtilities;
 
 public final class StreamUtility {
+	/**
+	 * Copies the data from one input stream to an
+	 * output stream.
+	 *
+	 * @param stream A readable data stream
+	 * @param output A writable data stream to write the data.
+	 * @throws IOException An I/O error occurred.
+	 */
   public static void copyStream(InputStream stream, OutputStream output)
       throws IOException {
     byte[] buffer=new byte[8192];
@@ -73,30 +80,16 @@ public final class StreamUtility {
 
   public static String streamToString(InputStream stream)
       throws IOException {
-    return streamToString("UTF-8",stream);
+	  StringBuilder builder=new StringBuilder();
+	  DataUtilities.ReadUtf8(stream, -1, builder, true);
+	  return builder.toString();
   }
-
-  public static String streamToString(String charset, InputStream stream)
-      throws IOException {
-    Reader reader = new InputStreamReader(stream, charset);
-    StringBuilder builder=new StringBuilder();
-    char[] buffer = new char[4096];
-    while(true){
-      int count=reader.read(buffer);
-      if(count<0) {
-        break;
-      }
-      builder.append(buffer,0,count);
-    }
-    return builder.toString();
-  }
-
 
   /**
-   * 
+   *
    * Writes a string in UTF-8 to the specified file.
    * If the file exists, it will be overwritten
-   * 
+   *
    * @param s a string to write. Illegal code unit
    * sequences are replaced with
    * with U+FFFD REPLACEMENT CHARACTER when writing to the stream.
@@ -117,9 +110,9 @@ public final class StreamUtility {
   }
 
   /**
-   * 
+   *
    * Writes a string in UTF-8 to the specified output stream.
-   * 
+   *
    * @param s a string to write. Illegal code unit
    * sequences are replaced with
    * U+FFFD REPLACEMENT CHARACTER when writing to the stream.
@@ -127,37 +120,7 @@ public final class StreamUtility {
    * @throws IOException if an I/O error occurs
    */
   public static void stringToStream(String s, OutputStream stream) throws IOException{
-    byte[] bytes=new byte[4];
-    for(int index=0;index<s.length();index++){
-      int c=s.charAt(index);
-      if(c>=0xD800 && c<=0xDBFF && index+1<s.length() &&
-          s.charAt(index+1)>=0xDC00 && s.charAt(index+1)<=0xDFFF){
-        // Get the Unicode code point for the surrogate pair
-        c=0x10000+(c-0xD800)*0x400+(s.charAt(index+1)-0xDC00);
-        index++;
-      } else if(c>=0xD800 && c<=0xDFFF){
-        // unpaired surrogate, write U+FFFD instead
-        c=0xFFFD;
-      }
-      if(c<=0x7F){
-        stream.write(c);
-      } else if(c<=0x7FF){
-        bytes[0]=((byte)(0xC0|((c>>6)&0x1F)));
-        bytes[1]=((byte)(0x80|(c   &0x3F)));
-        stream.write(bytes,0,2);
-      } else if(c<=0xFFFF){
-        bytes[0]=((byte)(0xE0|((c>>12)&0x0F)));
-        bytes[1]=((byte)(0x80|((c>>6 )&0x3F)));
-        bytes[2]=((byte)(0x80|(c      &0x3F)));
-        stream.write(bytes,0,3);
-      } else {
-        bytes[0]=((byte)(0xF0|((c>>18)&0x07)));
-        bytes[1]=((byte)(0x80|((c>>12)&0x3F)));
-        bytes[2]=((byte)(0x80|((c>>6 )&0x3F)));
-        bytes[3]=((byte)(0x80|(c      &0x3F)));
-        stream.write(bytes,0,4);
-      }
-    }
+	  DataUtilities.WriteUtf8(s, stream, true);
   }
 
   private StreamUtility(){}

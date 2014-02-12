@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.MalformedInputException;
 /**
- * 
+ *
  * Lightweight character input for UTF-8.
- * 
+ *
  * @author Peter
  *
  */
@@ -91,10 +91,9 @@ public class Utf8CharacterInput implements ICharacterInput {
   public int read(int[] buf, int offset, int unitCount)
       throws IOException {
     if((buf)==null)throw new NullPointerException("buf");
-    if((offset)<0)throw new IndexOutOfBoundsException("offset"+" not greater or equal to "+"0"+" ("+Integer.toString(offset)+")");
-    if((unitCount)<0)throw new IndexOutOfBoundsException("unitCount"+" not greater or equal to "+"0"+" ("+Integer.toString(unitCount)+")");
-    if((offset+unitCount)>buf.length)throw new IndexOutOfBoundsException("offset+unitCount"+" not less or equal to "+Integer.toString(buf.length)+" ("+Integer.toString(offset+unitCount)+")");
-    if(unitCount==0)return 0;
+    if((offset)<0)throw new IndexOutOfBoundsException("offset not greater or equal to "+"0 ("+Integer.toString(offset)+")");
+    if((unitCount)<0)throw new IndexOutOfBoundsException("unitCount not greater or equal to "+"0 ("+Integer.toString(unitCount)+")");
+    if((offset+unitCount)>buf.length)throw new IndexOutOfBoundsException("offset+unitCount not less or equal to "+Integer.toString(buf.length)+" ("+Integer.toString(offset+unitCount)+")");
     for(int i=0;i<unitCount;i++){
       int c=read();
       if(c<0)

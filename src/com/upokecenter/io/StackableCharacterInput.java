@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -13,15 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ *
  * A character input stream where additional inputs can be stacked on
  * top of it.  It supports advanced marking capabilities.
- * 
+ *
  * @author Peter
  *
  */
 public final class StackableCharacterInput implements IMarkableCharacterInput {
-
 
   private static class InputAndBuffer implements ICharacterInput {
 
@@ -99,11 +98,17 @@ public final class StackableCharacterInput implements IMarkableCharacterInput {
     this.stack.add(source);
   }
 
+  /**
+   * @inheritDoc com.upokecenter.io.IMarkableCharacterInput
+   */
   @Override
   public int getMarkPosition(){
     return pos;
   }
 
+  /**
+   * @inheritDoc com.upokecenter.io.IMarkableCharacterInput
+   */
   @Override
   public void moveBack(int count) throws IOException {
     if((count)<0)throw new IndexOutOfBoundsException("count not greater or equal to 0 ("+Integer.toString(count)+")");
@@ -252,6 +257,9 @@ public final class StackableCharacterInput implements IMarkableCharacterInput {
     return count;
   }
 
+  /**
+   * @inheritDoc com.upokecenter.io.IMarkableCharacterInput
+   */
   @Override
   public int setHardMark(){
     if(buffer==null){
@@ -274,6 +282,9 @@ public final class StackableCharacterInput implements IMarkableCharacterInput {
     return 0;
   }
 
+  /**
+   * @inheritDoc com.upokecenter.io.IMarkableCharacterInput
+   */
   @Override
   public void setMarkPosition(int pos) throws IOException{
     if(!haveMark || pos<0 || pos>endpos)
@@ -281,6 +292,9 @@ public final class StackableCharacterInput implements IMarkableCharacterInput {
     this.pos=pos;
   }
 
+  /**
+   * @inheritDoc com.upokecenter.io.IMarkableCharacterInput
+   */
   @Override
   public int setSoftMark(){
     if(!haveMark){

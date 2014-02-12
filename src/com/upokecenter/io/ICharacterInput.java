@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -12,16 +12,16 @@ import java.io.IOException;
 
 /**
  * An abstract stream of Unicode characters.
- * 
+ *
  * @author Peter
  *
  */
 public interface ICharacterInput {
 
   /**
-   * 
+   *
    * Reads the next Unicode character.
-   * 
+   *
    * @return A Unicode code point or -1 if the end of
    * the input is reached
    * @throws IOException if an I/O error occurs.
@@ -30,7 +30,7 @@ public interface ICharacterInput {
 
   /**
    * Reads multiple Unicode characters into a buffer.
-   * 
+   *
    * @param buf
    * @param offset
    * @param unitCount

@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -9,14 +9,14 @@ at: http://upokecenter.com/d/
 package com.upokecenter.util;
 
 /**
- * 
+ *
  * Contains utility methods for processing Uniform
  * Resource Identifiers (URIs) and Internationalized
  * Resource Identifiers (IRIs) under RFC3986 and RFC3987,
  * respectively.  In the following documentation, URIs
  * and IRIs include URI references and IRI references,
  * for convenience.
- * 
+ *
  * @author Peter
  *
  */
@@ -76,7 +76,6 @@ public final class URIUtility {
     }
   }
 
-
   private static void appendFragment(
       StringBuilder builder, String ref, int[] segments){
     if(segments[8]>=0){
@@ -89,7 +88,6 @@ public final class URIUtility {
       StringBuilder builder, String ref, int[] segments){
     builder.append(normalizePath(ref.substring(segments[4],segments[5])));
   }
-
 
   private static void appendPath(
       StringBuilder builder, String ref, int[] segments){
@@ -112,13 +110,11 @@ public final class URIUtility {
     }
   }
 
-
-
   /**
    * Escapes characters that cannot appear in URIs or IRIs.
    * The function is idempotent; that is, calling the function
    * again on the result with the same mode doesn't change the result.
-   * 
+   *
    * @param s a string to escape.
    * @param mode One of the following values:
    * <ul>
@@ -143,10 +139,10 @@ public final class URIUtility {
     if(s==null)return null;
     int[] components=null;
     if(mode==1){
-      components=splitIRI(s,ParseMode.IRIStrict);
+      components=(s==null) ? null : splitIRI(s,0,s.length(),ParseMode.IRIStrict);
       if(components==null)return null;
     } else {
-      components=splitIRI(s,ParseMode.IRISurrogateLenient);
+      components=(s==null) ? null : splitIRI(s,0,s.length(),ParseMode.IRISurrogateLenient);
     }
     int index=0;
     int sLength=s.length();
@@ -210,7 +206,7 @@ public final class URIUtility {
    * Determines whether the string is a valid IRI
    * with a scheme component.  This can be used
    * to check for relative IRI references.
-   * 
+   *
    * The following cases return true:
    * <pre>
    * example://y/z     xx-x:mm   example:/ww
@@ -219,20 +215,20 @@ public final class URIUtility {
    * <pre>
    * x@y:/z    /x/y/z      example.xyz
    * </pre>
-   * 
+   *
    * @param ref A string
    * @return true if the string is a valid IRI and
    * has a scheme component, false otherwise
    */
   public static boolean hasScheme(String ref){
-    int[] segments=splitIRI(ref);
+    int[] segments=(ref==null) ? null : splitIRI(ref,0,ref.length(),ParseMode.IRIStrict);
     return segments!=null && segments[0]>=0;
   }
   /**
    * Determines whether the string is a valid URI
    * with a scheme component.  This can be used
    * to check for relative URI references.
-   * 
+   *
    * The following cases return true:
    * <pre>
    * example://y/z     xx-x:mm   example:/ww
@@ -241,15 +237,15 @@ public final class URIUtility {
    * <pre>
    * x@y:/z    /x/y/z      example.xyz
    * </pre>
-   * 
-   * 
+   *
+   *
    * @param ref A string
    * @return true if the string is a valid URI (ASCII
    * characters only) and has a scheme component,
    * false otherwise.
    */
   public static boolean hasSchemeForURI(String ref){
-    int[] segments=splitIRI(ref,ParseMode.URIStrict);
+    int[] segments=(ref==null) ? null : splitIRI(ref,0,ref.length(),ParseMode.URIStrict);
     return segments!=null && segments[0]>=0;
   }
   private static boolean isHexChar(char c) {
@@ -316,17 +312,17 @@ public final class URIUtility {
   }
 
   /**
-   * 
+   *
    * Determines whether the substring is a valid CURIE
    * reference under RDFa 1.1. (The CURIE reference is
    * the part after the colon.)
-   * 
+   *
    * @param s A string.
    * @param offset Index of the first character of a substring
    * to check for a CURIE reference.
    * @param length Length of the substring to check for a
    * CURIE reference.
-   * 
+   *
    */
   public static boolean isValidCurieReference(String s, int offset, int length){
     if(s==null)return false;
@@ -382,7 +378,7 @@ public final class URIUtility {
   }
 
   public static boolean isValidIRI(String s){
-    return splitIRI(s)!=null;
+    return ((s==null) ? null : splitIRI(s,0,s.length(),ParseMode.IRIStrict))!=null;
   }
 
   private static String normalizePath(String path){
@@ -720,9 +716,9 @@ public final class URIUtility {
   }
 
   /**
-   * 
+   *
    * Resolves a URI or IRI relative to another URI or IRI.
-   * 
+   *
    * @param ref an absolute or relative URI reference
    * @param baseURI an absolute URI reference.
    * @return the resolved IRI, or null if ref is null or is not a
@@ -733,9 +729,9 @@ public final class URIUtility {
     return relativeResolve(ref,baseURI,ParseMode.IRIStrict);
   }
   /**
-   * 
+   *
    * Resolves a URI or IRI relative to another URI or IRI.
-   * 
+   *
    * @param ref an absolute or relative URI reference
    * @param baseURI an absolute URI reference.
    * @param parseMode Specifies whether certain characters are allowed
@@ -745,9 +741,9 @@ public final class URIUtility {
    * is null or is not a valid IRI, returns ref.
    */
   public static String relativeResolve(String ref, String baseURI, ParseMode parseMode){
-    int[] segments=splitIRI(ref,parseMode);
+    int[] segments=(ref==null) ? null : splitIRI(ref,0,ref.length(),parseMode);
     if(segments==null)return null;
-    int[] segmentsBase=splitIRI(baseURI,parseMode);
+    int[] segmentsBase=(baseURI==null) ? null : splitIRI(baseURI,0,baseURI.length(),parseMode);
     if(segmentsBase==null)return ref;
     StringBuilder builder=new StringBuilder();
     if(segments[0]>=0){ // scheme present
@@ -800,7 +796,7 @@ public final class URIUtility {
    * under RFC3987.  If the IRI reference is syntactically valid, splits
    * the string into its components and returns an array containing
    * the indices into the components.
-   * 
+   *
    * @param s A string.
    * @return If the string is a valid IRI reference, returns an array of 10
    * integers.  Each of the five pairs corresponds to the start
@@ -810,7 +806,7 @@ public final class URIUtility {
    * or is not a valid IRI, returns null.
    */
   public static int[] splitIRI(String s){
-    return splitIRI(s,ParseMode.IRIStrict);
+    return (s==null) ? null : splitIRI(s,0,s.length(),ParseMode.IRIStrict);
   }
 
   /**
@@ -819,7 +815,7 @@ public final class URIUtility {
    * under RFC3987.  If the IRI is syntactically valid, splits
    * the string into its components and returns an array containing
    * the indices into the components.
-   * 
+   *
    * @param s A string.
    * @param offset Index of the first character of a substring
    * to check for an IRI.
@@ -1035,13 +1031,12 @@ public final class URIUtility {
     return retval;
   }
 
-
   /**
    * Parses an Internationalized Resource Identifier (IRI) reference
    * under RFC3987.  If the IRI is syntactically valid, splits
    * the string into its components and returns an array containing
    * the indices into the components.
-   * 
+   *
    * @param s A string.
    * @param parseMode Specifies whether certain characters are allowed
    * in the string.
@@ -1053,8 +1048,7 @@ public final class URIUtility {
    * or is not a valid IRI, returns null.
    */
   public static int[] splitIRI(String s, ParseMode parseMode){
-    if(s==null)return null;
-    return splitIRI(s,0,s.length(),parseMode);
+    return (s==null) ? null : splitIRI(s,0,s.length(),parseMode);
   }
   private URIUtility(){}
 }

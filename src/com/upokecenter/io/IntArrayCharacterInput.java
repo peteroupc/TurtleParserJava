@@ -1,5 +1,5 @@
 /*
-Written in 2013 by Peter Occil.  
+Written in 2013 by Peter Occil.
 Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
@@ -9,7 +9,6 @@ at: http://upokecenter.com/d/
 package com.upokecenter.io;
 
 import java.io.IOException;
-
 
 public final class IntArrayCharacterInput implements ICharacterInput {
 
