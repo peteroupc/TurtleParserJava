@@ -4,7 +4,7 @@ Any copyright is dedicated to the Public Domain.
 http://creativecommons.org/publicdomain/zero/1.0/
 
 If you like this, you should donate to Peter O.
-at: http://upokecenter.com/d/
+at: http://upokecenter.dreamhosters.com/articles/donate-now-2/
 */
 package com.upokecenter.io;
 
@@ -284,7 +284,7 @@ public final class ConditionalBufferInputStream extends InputStream {
       return stream.skip(byteCount);
     byte[] data=new byte[1024];
     long ret=0;
-    while(byteCount<0){
+    while(byteCount>0){
       int bc=(int)Math.min(byteCount,data.length);
       int c=doRead(data,0,bc);
       if(c<=0) {
