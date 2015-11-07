@@ -21,7 +21,7 @@ import com.upokecenter.io.StringCharacterInput;
 
 public final class NTriplesParser implements IRDFParser {
 
-  public static class AsciiCharacterInput implements ICharacterInput {
+  static class AsciiCharacterInput implements ICharacterInput {
 
     InputStream stream;
 
