@@ -37,19 +37,6 @@ public final class StreamUtility {
     }
   }
 
-  public static String fileToString(File file)
-      throws IOException {
-    FileInputStream input=null;
-    try {
-      input=new FileInputStream(file);
-      return streamToString(input);
-    } finally {
-      if(input!=null) {
-        input.close();
-      }
-    }
-  }
-
   public static void inputStreamToFile(InputStream stream, File file)
       throws IOException {
     FileOutputStream output=null;
@@ -78,11 +65,17 @@ public final class StreamUtility {
     }
   }
 
-  public static String streamToString(InputStream stream)
+  public static String fileToString(File file)
       throws IOException {
-    StringBuilder builder=new StringBuilder();
-    DataUtilities.ReadUtf8(stream, -1, builder, true);
-    return builder.toString();
+    FileInputStream input=null;
+    try {
+      input=new FileInputStream(file);
+      return DataUtilities.ReadUtf8ToString(input);
+    } finally {
+      if(input!=null) {
+        input.close();
+      }
+    }
   }
 
   /**
@@ -101,28 +94,13 @@ public final class StreamUtility {
     OutputStream os=null;
     try {
       os=new FileOutputStream(file);
-      stringToStream(s,os);
+      DataUtilities.WriteUtf8(s, os, true);
     } finally {
       if(os!=null) {
         os.close();
       }
     }
   }
-
-  /**
-   *
-   * Writes a string in UTF-8 to the specified output stream.
-   *
-   * @param s a string to write. Illegal code unit
-   * sequences are replaced with
-   * U+FFFD REPLACEMENT CHARACTER when writing to the stream.
-   * @param stream an output stream to write to.
-   * @throws IOException if an I/O error occurs
-   */
-  public static void stringToStream(String s, OutputStream stream) throws IOException{
-    DataUtilities.WriteUtf8(s, stream, true);
-  }
-
   private StreamUtility(){}
 
 }
